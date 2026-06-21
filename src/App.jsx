@@ -1,5 +1,37 @@
 import { useState } from 'react'
 
+// Read UTM params from the current page URL and append them to a Stripe checkout URL.
+// This preserves marketing attribution when users navigate from our storefront to Stripe.
+function withUtmParams(baseUrl) {
+  const params = new URLSearchParams(window.location.search)
+  const utmParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']
+  const hasUtm = utmParams.some(p => params.has(p))
+  if (!hasUtm) return baseUrl
+
+  const url = new URL(baseUrl)
+  utmParams.forEach(p => {
+    if (params.has(p)) url.searchParams.set(p, params.get(p))
+  })
+  return url.toString()
+}
+
+// Track a click event via Google Analytics 4 (gtag)
+function trackStripeClick(eventName, label) {
+  if (typeof window.gtag === 'function') {
+    window.gtag('event', eventName, {
+      event_category: 'Stripe Checkout',
+      event_label: label,
+      send_to: 'G-XXXXXXXXXX', // Replace with your GA4 measurement ID
+    })
+  }
+}
+
+function openStripe(baseUrl, eventLabel) {
+  const url = withUtmParams(baseUrl)
+  trackStripeClick('begin_checkout', eventLabel)
+  window.open(url, '_blank')
+}
+
 const kits = [
   {
     id: 'real-estate',
@@ -137,7 +169,7 @@ function KitCard({ kit, onBuy }) {
             <span className="text-gray-400 text-sm ml-1">one-time</span>
           </div>
           <button
-            onClick={() => window.open(kit.stripeLink, '_blank')}
+            onClick={() => openStripe(kit.stripeLink, kit.title)}
             className="px-6 py-2.5 bg-gray-900 text-white rounded-xl font-semibold text-sm hover:bg-gray-800 transition-all active:scale-95"
           >
             Buy Kit
@@ -178,13 +210,13 @@ function ProPlanModal({ onClose }) {
         {/* Subscription Options */}
         <div className="space-y-3 mb-6">
           <button
-            onClick={() => window.open('https://buy.stripe.com/aFa5kD4l63fi67U5sSfYY03', '_blank')}
+            onClick={() => openStripe('https://buy.stripe.com/aFa5kD4l63fi67U5sSfYY03', 'Pro Plan Monthly')}
             className="w-full py-3.5 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-all active:scale-95 shadow-lg shadow-black/10"
           >
             Subscribe Monthly — $19/month
           </button>
           <button
-            onClick={() => window.open('https://buy.stripe.com/8x2dR918UdTWbsef3sfYY04', '_blank')}
+            onClick={() => openStripe('https://buy.stripe.com/8x2dR918UdTWbsef3sfYY04', 'Pro Plan Annual')}
             className="w-full py-3.5 bg-gradient-to-r from-[#2D5A3D] to-[#1A3A27] text-white rounded-xl font-semibold hover:from-[#1A3A27] hover:to-[#0F2A1A] transition-all active:scale-95 shadow-lg shadow-black/10"
           >
             Subscribe Annual — $199/year <span className="text-[#D4A574] text-xs font-medium">(Save 16%)</span>
