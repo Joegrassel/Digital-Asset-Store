@@ -175,23 +175,21 @@ function ProPlanModal({ onClose }) {
           <p className="text-sm text-gray-500">or <span className="font-semibold text-gray-700">$199/year</span> (save 16%)</p>
         </div>
 
-        {/* Stripe Placeholder */}
-        <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 mb-6 bg-gray-50">
-          <div className="text-center">
-            <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M13.976 9.15c-2.172-.806-3.356-1.526-3.356-2.901 0-1.584 1.567-2.774 3.874-2.774 2.25 0 3.855 1.08 4.377 2.737l2.68-.745c-.86-2.5-3.16-4.108-6.712-4.108-3.89 0-6.673 2.173-6.673 5.248 0 3.687 3.666 4.798 6.305 5.558 2.337.676 3.353 1.55 3.353 2.942 0 1.476-1.135 2.804-3.62 2.804-2.4 0-4.187-1.196-4.822-3.102l-2.748.726c1.023 3.218 3.558 4.807 7.106 4.807 4.09 0 6.98-2.489 6.98-5.902 0-3.918-3.67-4.994-6.342-5.784zM3.28 2v20h3.228V2H3.28z"/>
-            </svg>
-            <p className="text-gray-400 font-medium text-sm mb-1">Stripe Subscription — Coming Soon</p>
-            <p className="text-gray-400 text-xs">Recurring payment integration will be available in the next release.</p>
-          </div>
+        {/* Subscription Options */}
+        <div className="space-y-3 mb-6">
+          <button
+            onClick={() => window.open('https://buy.stripe.com/aFa5kD4l63fi67U5sSfYY03', '_blank')}
+            className="w-full py-3.5 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-all active:scale-95 shadow-lg shadow-black/10"
+          >
+            Subscribe Monthly — $19/month
+          </button>
+          <button
+            onClick={() => window.open('https://buy.stripe.com/8x2dR918UdTWbsef3sfYY04', '_blank')}
+            className="w-full py-3.5 bg-gradient-to-r from-[#2D5A3D] to-[#1A3A27] text-white rounded-xl font-semibold hover:from-[#1A3A27] hover:to-[#0F2A1A] transition-all active:scale-95 shadow-lg shadow-black/10"
+          >
+            Subscribe Annual — $199/year <span className="text-[#D4A574] text-xs font-medium">(Save 16%)</span>
+          </button>
         </div>
-
-        <button
-          onClick={onClose}
-          className="w-full py-3 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-all"
-        >
-          Got it
-        </button>
       </div>
     </div>
   )
