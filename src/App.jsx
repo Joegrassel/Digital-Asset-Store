@@ -82,8 +82,9 @@ function LeadMagnetModal({ magnet, onClose }) {
           setStatus('success')
           return
         }
-        setErrorMsg(data.error.message || 'Something went wrong')
-        setStatus('error')
+        // For other errors (invalid API key, wrong list ID), still allow download
+        // This ensures users aren't blocked while we set up the email integration
+        setStatus('success')
         return
       }
 
