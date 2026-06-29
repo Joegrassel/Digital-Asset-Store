@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-const EMAILOCTOPUS_API_KEY = 'eo_251fob442117d9dd01f3e4313c541204445103194005972afb48f404886794b0'
-const EMAILOCTOPUS_LIST_ID = '1a2b3c4d5e' // Replace with your EmailOctopus list ID
+const EMAILOCTOPUS_API_KEY = 'eo_251f0b442117d9dd01f3e4313c541204445103194005972afb48f404886794b0'
+const EMAILOCTOPUS_LIST_ID = '68fa4dee-6d87-11f1-8610-b78c32b14f7f'
 
 const leadMagnets = [
   {
