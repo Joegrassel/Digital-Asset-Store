@@ -356,7 +356,8 @@ function KitCard({ kit, onBuy }) {
   )
 }
 
-function ProPlanModal({ onClose }) {
+function ProPlanModal({ show, onClose }) {
+  if (!show) return null
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={onClose}>
       <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative" onClick={e => e.stopPropagation()}>
