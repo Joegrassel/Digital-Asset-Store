@@ -7,7 +7,7 @@
 
 Use this 4-week content calendar to plan your Instagram and LinkedIn posts. Each week has a theme, and every post has a clear purpose — portfolio, trust, personality, or conversion.
 
-> 🎨 Templates already designed? Our [Boutique Brand Kit](http://localhost:3000) includes editorial-style templates for every post type below.
+> 🎨 Templates already designed? Our [Boutique Brand Kit](https://joegrassel.github.io/Digital-Asset-Store/) includes editorial-style templates for every post type below.
 
 ---
 

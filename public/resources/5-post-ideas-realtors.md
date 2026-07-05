@@ -9,7 +9,7 @@ Real estate agents who post consistently generate 5x more leads than those who d
 
 Here are 5 high-impact post ideas — use them as-is or adapt them to your market.
 
-> 📥 Want the designs ready-made? Check out our [Real Estate Starter Kit](http://localhost:3000) with 5 premium templates you can customize in minutes.
+> 📥 Want the designs ready-made? Check out our [Real Estate Starter Kit](https://joegrassel.github.io/Digital-Asset-Store/) with 5 premium templates you can customize in minutes.
 
 ---
 
