@@ -356,6 +356,51 @@ function KitCard({ kit, onBuy }) {
   )
 }
 
+function StripeModal({ kit, onClose }) {
+  if (!kit) return null
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative" onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors">
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-[#D4A574] to-[#C4955A] flex items-center justify-center">
+            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 className="font-heading text-2xl font-bold text-gray-900 mb-2">Complete Your Purchase</h3>
+          <p className="text-gray-500 text-sm">
+            You're purchasing the <span className="font-semibold text-gray-800">{kit.title}</span> for <span className="font-semibold text-gray-800">${kit.price}</span>
+          </p>
+        </div>
+
+        {/* Stripe Placeholder */}
+        <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 mb-6 bg-gray-50">
+          <div className="text-center">
+            <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M13.976 9.15c-2.172-.806-3.356-1.526-3.356-2.901 0-1.584 1.567-2.774 3.874-2.774 2.25 0 3.855 1.08 4.377 2.737l2.68-.745c-.86-2.5-3.16-4.108-6.712-4.108-3.89 0-6.673 2.173-6.673 5.248 0 3.687 3.666 4.798 6.305 5.558 2.337.676 3.353 1.55 3.353 2.942 0 1.476-1.135 2.804-3.62 2.804-2.4 0-4.187-1.196-4.822-3.102l-2.748.726c1.023 3.218 3.558 4.807 7.106 4.807 4.09 0 6.98-2.489 6.98-5.902 0-3.918-3.67-4.994-6.342-5.784zM3.28 2v20h3.228V2H3.28z"/>
+            </svg>
+            <p className="text-gray-400 font-medium text-sm mb-1">Stripe Checkout — Coming Soon</p>
+            <p className="text-gray-400 text-xs">Secure payment integration will be available in the next release.</p>
+          </div>
+        </div>
+
+        <button
+          onClick={onClose}
+          className="w-full py-3 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-all"
+        >
+          Got it
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function ProPlanModal({ show, onClose }) {
   if (!show) return null
   return (
