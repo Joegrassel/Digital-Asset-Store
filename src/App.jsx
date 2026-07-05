@@ -1,5 +1,213 @@
 import { useState } from 'react'
 
+const EMAILOCTOPUS_API_KEY = 'eo_251f0b442117d9dd01f3e4313c541204445103194005972afb48f404886794b0'
+const EMAILOCTOPUS_LIST_ID = '68fa4dee-6d87-11f1-8610-b78c32b14f7f'
+
+const leadMagnets = [
+  {
+    id: 'realtor-ideas',
+    title: '5 Post Ideas for Realtors',
+    niche: 'Real Estate',
+    description: 'Stop the scroll with these 5 high-impact post ideas for real estate agents.',
+    file: '/resources/5-post-ideas-realtors.md',
+    icon: '🏡',
+  },
+  {
+    id: 'clinic-audit',
+    title: 'Clinic Instagram Audit',
+    niche: 'Aesthetic Clinic',
+    description: 'A 10-point checklist to optimize your aesthetic clinic\'s Instagram presence.',
+    file: '/resources/clinic-instagram-audit.md',
+    icon: '💆',
+  },
+  {
+    id: 'boutique-calendar',
+    title: 'Boutique Content Calendar',
+    niche: 'Boutique Brand',
+    description: 'A month of ready-to-post content ideas for boutique service providers.',
+    file: '/resources/boutique-content-calendar.md',
+    icon: '✨',
+  },
+]
+
+function LeadMagnetCard({ magnet, onGetResource }) {
+  return (
+    <div className="bg-white rounded-xl border border-gray-100 p-6 hover:shadow-lg transition-all hover:-translate-y-0.5 flex flex-col">
+      <div className="text-3xl mb-3">{magnet.icon}</div>
+      <h3 className="font-heading font-bold text-gray-900 mb-1">{magnet.title}</h3>
+      <p className="text-xs font-semibold tracking-widest uppercase text-[#D4A574] mb-2">{magnet.niche}</p>
+      <p className="text-sm text-gray-500 mb-4 flex-1">{magnet.description}</p>
+      <button
+        onClick={() => onGetResource(magnet)}
+        className="w-full py-2.5 border-2 border-gray-200 text-gray-700 rounded-xl font-semibold text-sm hover:border-[#D4A574] hover:text-[#D4A574] transition-all active:scale-95"
+      >
+        Get Free Guide
+      </button>
+    </div>
+  )
+}
+
+function LeadMagnetModal({ magnet, onClose }) {
+  const [email, setEmail] = useState('')
+  const [name, setName] = useState('')
+  const [status, setStatus] = useState('form') // 'form' | 'loading' | 'success' | 'error'
+  const [errorMsg, setErrorMsg] = useState('')
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!email) return
+    setStatus('loading')
+    setErrorMsg('')
+
+    try {
+      const response = await fetch(
+        `https://emailoctopus.com/api/1.6/lists/${EMAILOCTOPUS_LIST_ID}/contacts`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            api_key: EMAILOCTOPUS_API_KEY,
+            email_address: email,
+            fields: { FirstName: name },
+            tags: [magnet.niche, 'lead_magnet', 'beta_launch'],
+          }),
+        }
+      )
+
+      const data = await response.json()
+
+      if (data.error) {
+        // If contact already exists, still allow download
+        if (data.error.code === 'MEMBER_EXISTS_WITH_EMAIL_ADDRESS') {
+          setStatus('success')
+          return
+        }
+        // For other errors (invalid API key, wrong list ID), still allow download
+        // This ensures users aren't blocked while we set up the email integration
+        setStatus('success')
+        return
+      }
+
+      setStatus('success')
+    } catch (err) {
+      setErrorMsg('Network error — please try again')
+      setStatus('error')
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative" onClick={e => e.stopPropagation()}>
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors">
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        {status === 'success' ? (
+          <div className="text-center py-4">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
+              <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+              </svg>
+            </div>
+            <h3 className="font-heading text-2xl font-bold text-gray-900 mb-2">You're In! 🎉</h3>
+            <p className="text-gray-500 text-sm mb-6">Your download should start automatically. Check your inbox for more resources.</p>
+            <a
+              href={magnet.file}
+              download
+              className="inline-block w-full py-3 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-all text-center"
+            >
+              Download {magnet.title}
+            </a>
+            {magnet.id === 'clinic-audit' && (
+              <p className="text-xs text-gray-400 mt-3">Already subscribed? <a href={magnet.file} download className="text-[#D4A574] underline">Click here</a></p>
+            )}
+          </div>
+        ) : (
+          <>
+            <div className="text-center mb-6">
+              <div className="text-4xl mb-3">{magnet.icon}</div>
+              <h3 className="font-heading text-2xl font-bold text-gray-900 mb-2">Get Your Free Guide</h3>
+              <p className="text-gray-500 text-sm">{magnet.description}</p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Your first name"
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4A574] focus:border-transparent text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  required
+                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4A574] focus:border-transparent text-sm"
+                />
+              </div>
+
+              {status === 'error' && (
+                <p className="text-sm text-red-500">{errorMsg}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={status === 'loading'}
+                className="w-full py-3 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {status === 'loading' ? 'Sending...' : 'Get My Free Guide'}
+              </button>
+            </form>
+
+            <p className="text-xs text-gray-400 text-center mt-4">No spam. Unsubscribe anytime.</p>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Read UTM params from the current page URL and append them to a Stripe checkout URL.
+// This preserves marketing attribution when users navigate from our storefront to Stripe.
+function withUtmParams(baseUrl) {
+  const params = new URLSearchParams(window.location.search)
+  const utmParams = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term']
+  const hasUtm = utmParams.some(p => params.has(p))
+  if (!hasUtm) return baseUrl
+
+  const url = new URL(baseUrl)
+  utmParams.forEach(p => {
+    if (params.has(p)) url.searchParams.set(p, params.get(p))
+  })
+  return url.toString()
+}
+
+// Track a click event via Google Analytics 4 (gtag)
+function trackStripeClick(eventName, label) {
+  if (typeof window.gtag === 'function') {
+    window.gtag('event', eventName, {
+      event_category: 'Stripe Checkout',
+      event_label: label,
+      send_to: 'G-XXXXXXXXXX', // Replace with your GA4 measurement ID
+    })
+  }
+}
+
+function openStripe(baseUrl, eventLabel) {
+  const url = withUtmParams(baseUrl)
+  trackStripeClick('begin_checkout', eventLabel)
+  window.open(url, '_blank')
+}
+
 const kits = [
   {
     id: 'real-estate',
@@ -25,6 +233,7 @@ const kits = [
       '/images/real-estate/linkedin-banner.png',
     ],
     industry: 'Real Estate Agents & Brokerages',
+    stripeLink: 'https://buy.stripe.com/8x2aEX4l617abse6wWfYY00',
   },
   {
     id: 'aesthetic-clinic',
@@ -50,6 +259,7 @@ const kits = [
       '/images/aesthetic-clinic/linkedin-banner.png',
     ],
     industry: 'Aesthetic Clinics & Med-Spas',
+    stripeLink: 'https://buy.stripe.com/4gM9AT7xi9DGfIucVkfYY01',
   },
   {
     id: 'boutique-brand',
@@ -75,6 +285,7 @@ const kits = [
       '/images/boutique-brand/linkedin-banner.png',
     ],
     industry: 'Boutique Service Providers',
+    stripeLink: 'https://buy.stripe.com/7sYcN59FqaHKcwi2gGfYY02',
   },
 ]
 
@@ -134,7 +345,7 @@ function KitCard({ kit, onBuy }) {
             <span className="text-gray-400 text-sm ml-1">one-time</span>
           </div>
           <button
-            onClick={() => onBuy(kit)}
+            onClick={() => openStripe(kit.stripeLink, kit.title)}
             className="px-6 py-2.5 bg-gray-900 text-white rounded-xl font-semibold text-sm hover:bg-gray-800 transition-all active:scale-95"
           >
             Buy Kit
@@ -218,23 +429,21 @@ function ProPlanModal({ show, onClose }) {
           <p className="text-sm text-gray-500">or <span className="font-semibold text-gray-700">$199/year</span> (save 16%)</p>
         </div>
 
-        {/* Stripe Placeholder */}
-        <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 mb-6 bg-gray-50">
-          <div className="text-center">
-            <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M13.976 9.15c-2.172-.806-3.356-1.526-3.356-2.901 0-1.584 1.567-2.774 3.874-2.774 2.25 0 3.855 1.08 4.377 2.737l2.68-.745c-.86-2.5-3.16-4.108-6.712-4.108-3.89 0-6.673 2.173-6.673 5.248 0 3.687 3.666 4.798 6.305 5.558 2.337.676 3.353 1.55 3.353 2.942 0 1.476-1.135 2.804-3.62 2.804-2.4 0-4.187-1.196-4.822-3.102l-2.748.726c1.023 3.218 3.558 4.807 7.106 4.807 4.09 0 6.98-2.489 6.98-5.902 0-3.918-3.67-4.994-6.342-5.784zM3.28 2v20h3.228V2H3.28z"/>
-            </svg>
-            <p className="text-gray-400 font-medium text-sm mb-1">Stripe Subscription — Coming Soon</p>
-            <p className="text-gray-400 text-xs">Recurring payment integration will be available in the next release.</p>
-          </div>
+        {/* Subscription Options */}
+        <div className="space-y-3 mb-6">
+          <button
+            onClick={() => openStripe('https://buy.stripe.com/aFa5kD4l63fi67U5sSfYY03', 'Pro Plan Monthly')}
+            className="w-full py-3.5 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-all active:scale-95 shadow-lg shadow-black/10"
+          >
+            Subscribe Monthly — $19/month
+          </button>
+          <button
+            onClick={() => openStripe('https://buy.stripe.com/8x2dR918UdTWbsef3sfYY04', 'Pro Plan Annual')}
+            className="w-full py-3.5 bg-gradient-to-r from-[#2D5A3D] to-[#1A3A27] text-white rounded-xl font-semibold hover:from-[#1A3A27] hover:to-[#0F2A1A] transition-all active:scale-95 shadow-lg shadow-black/10"
+          >
+            Subscribe Annual — $199/year <span className="text-[#D4A574] text-xs font-medium">(Save 16%)</span>
+          </button>
         </div>
-
-        <button
-          onClick={onClose}
-          className="w-full py-3 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-all"
-        >
-          Got it
-        </button>
       </div>
     </div>
   )
@@ -264,6 +473,7 @@ function NavBar() {
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-8">
             <button onClick={() => scrollTo('kits')} className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Kits</button>
+            <button onClick={() => scrollTo('resources')} className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Free Resources</button>
             <button onClick={() => scrollTo('pro-plan')} className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">Pro Plan</button>
             <button onClick={() => scrollTo('faq')} className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">FAQ</button>
           </div>
@@ -284,6 +494,7 @@ function NavBar() {
         {open && (
           <div className="md:hidden pb-4 space-y-2">
             <button onClick={() => scrollTo('kits')} className="block w-full text-left px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">Kits</button>
+            <button onClick={() => scrollTo('resources')} className="block w-full text-left px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">Free Resources</button>
             <button onClick={() => scrollTo('pro-plan')} className="block w-full text-left px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">Pro Plan</button>
             <button onClick={() => scrollTo('faq')} className="block w-full text-left px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg">FAQ</button>
           </div>
@@ -315,8 +526,8 @@ function Footer() {
 }
 
 function App() {
-  const [buyKit, setBuyKit] = useState(null)
   const [showPro, setShowPro] = useState(false)
+  const [leadMagnet, setLeadMagnet] = useState(null)
 
   return (
     <div className="min-h-screen">
@@ -398,7 +609,7 @@ function App() {
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {kits.map(kit => (
-              <KitCard key={kit.id} kit={kit} onBuy={setBuyKit} />
+              <KitCard key={kit.id} kit={kit} />
             ))}
           </div>
         </div>
@@ -461,6 +672,23 @@ function App() {
         </div>
       </section>
 
+      {/* FREE RESOURCES */}
+      <section id="resources" className="py-16 sm:py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="font-heading text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Free Resources</h2>
+            <p className="max-w-xl mx-auto text-gray-500 text-lg">
+              Download industry-specific guides to kickstart your social media strategy.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {leadMagnets.map(magnet => (
+              <LeadMagnetCard key={magnet.id} magnet={magnet} onGetResource={setLeadMagnet} />
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* FAQ */}
       <section id="faq" className="py-16 sm:py-24">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -483,9 +711,11 @@ function App() {
 
       <Footer />
 
-      {/* Modals */}
-      <StripeModal kit={buyKit} onClose={() => setBuyKit(null)} />
+      {/* Pro Plan Modal */}
       <ProPlanModal show={showPro} onClose={() => setShowPro(false)} />
+
+      {/* Lead Magnet Modal */}
+      <LeadMagnetModal magnet={leadMagnet} onClose={() => setLeadMagnet(null)} />
     </div>
   )
 }
