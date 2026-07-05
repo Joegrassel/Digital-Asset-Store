@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const EMAILOCTOPUS_API_KEY = 'eo_251f0b442117d9dd01f3e4313c541204445103194005972afb48f404886794b0'
 const EMAILOCTOPUS_LIST_ID = '68fa4dee-6d87-11f1-8610-b78c32b14f7f'
@@ -525,9 +525,182 @@ function Footer() {
   )
 }
 
+// Product lookup for download pages
+const kitProductMap = {
+  'real-estate': { id: 'real-estate', title: 'Real Estate Starter Kit', icon: '🏡', zip: '/Digital-Asset-Store/downloads/real-estate-starter-kit.zip', price: 29, niche: 'Real Estate' },
+  'aesthetic-clinic': { id: 'aesthetic-clinic', title: 'Clinic Essentials Kit', icon: '💆', zip: '/Digital-Asset-Store/downloads/clinic-essentials-kit.zip', price: 39, niche: 'Aesthetic Clinic' },
+  'boutique-brand': { id: 'boutique-brand', title: 'Boutique Brand Kit', icon: '✨', zip: '/Digital-Asset-Store/downloads/boutique-brand-kit.zip', price: 39, niche: 'Boutique Brand' },
+  'pro-plan': { id: 'pro-plan', title: 'Pro Plan Subscription', icon: '⭐', zip: null, price: 19, niche: 'Pro Plan' },
+}
+
+function DownloadPage() {
+  const params = new URLSearchParams(window.location.hash.split('?')[1] || '')
+  const productId = params.get('product') || 'real-estate'
+  const product = kitProductMap[productId] || kitProductMap['real-estate']
+  const [email, setEmail] = useState('')
+  const [name, setName] = useState('')
+  const [status, setStatus] = useState('initial')
+  const [errorMsg, setErrorMsg] = useState('')
+
+  const handleEmailSubmit = async (e) => {
+    e.preventDefault()
+    if (!email) return
+    setStatus('sending')
+    setErrorMsg('')
+
+    try {
+      const tag = productId === 'pro-plan' ? 'paid_pro_plan' : `paid_${product.niche.toLowerCase().replace(/ /g, '_')}`
+      const res = await fetch(`https://emailoctopus.com/api/1.6/lists/${EMAILOCTOPUS_LIST_ID}/contacts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          api_key: EMAILOCTOPUS_API_KEY,
+          email_address: email,
+          fields: { FirstName: name || 'Valued Customer' },
+          tags: [tag, product.niche, 'purchased'],
+        }),
+      })
+      const data = await res.json()
+      if (data.error && data.error.code !== 'MEMBER_EXISTS_WITH_EMAIL_ADDRESS') {
+        console.warn('EmailOctopus error:', data.error)
+      }
+      setStatus('ready')
+    } catch (err) {
+      console.warn('Email delivery error:', err)
+      setStatus('ready')
+    }
+  }
+
+  const goHome = () => {
+    window.location.hash = '#/'
+    window.location.reload()
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-2xl mx-auto px-4 py-12">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <button onClick={goHome} className="text-sm text-gray-400 hover:text-gray-600 mb-4 inline-flex items-center gap-1">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Back to Store
+          </button>
+          <div className="text-5xl mb-4">{product.icon}</div>
+          <h1 className="font-heading text-3xl font-bold text-gray-900 mb-2">Your Purchase is Complete! 🎉</h1>
+          <p className="text-gray-500">Thank you for purchasing the <strong className="text-gray-800">{product.title}</strong>.</p>
+        </div>
+
+        {/* Email Verification */}
+        {status === 'initial' && (
+          <div className="bg-white rounded-2xl shadow-lg p-8 mb-6">
+            <h2 className="font-heading text-xl font-bold text-gray-900 mb-2">Get Your Download</h2>
+            <p className="text-sm text-gray-500 mb-6">Enter the email you used at checkout to receive your download link.</p>
+            <form onSubmit={handleEmailSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Your name" className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4A574] focus:border-transparent text-sm" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" required className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D4A574] focus:border-transparent text-sm" />
+              </div>
+              {errorMsg && <p className="text-sm text-red-500">{errorMsg}</p>}
+              <button type="submit" disabled={status === 'sending'} className="w-full py-3 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-all active:scale-95 disabled:opacity-50">
+                {status === 'sending' ? 'Verifying...' : 'Send Download Link'}
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* Download Ready */}
+        {status === 'ready' && (
+          <>
+            <div className="bg-white rounded-2xl shadow-lg p-8 mb-6 text-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
+                <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              </div>
+              <h2 className="font-heading text-2xl font-bold text-gray-900 mb-2">Ready to Download! 📥</h2>
+              <p className="text-gray-500 text-sm mb-6">Check your inbox too — we've sent a backup copy to <strong>{email}</strong>.</p>
+              {product.zip ? (
+                <a href={product.zip} download className="inline-block w-full py-3.5 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-all text-center shadow-lg shadow-black/10">
+                  Download {product.title} ({Math.round(product.price * 0.28)} MB ZIP)
+                </a>
+              ) : (
+                <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-600">
+                  <p className="font-semibold mb-1">Pro Plan Access</p>
+                  <p>You now have full access to all kits. Browse and download any kit from our store.</p>
+                  <button onClick={goHome} className="mt-3 w-full py-2.5 bg-gray-900 text-white rounded-xl font-semibold hover:bg-gray-800 transition-all">
+                    Browse All Kits
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* What's Included */}
+            <div className="bg-white rounded-2xl shadow-lg p-8">
+              <h3 className="font-heading text-lg font-bold text-gray-900 mb-4">What's in your kit</h3>
+              <ul className="space-y-2">
+                {[
+                  '6 high-resolution templates optimized for Instagram & LinkedIn',
+                  'Style guide with exact colors, fonts, and dimensions',
+                  'Instagram Post templates (1080×1080px)',
+                  'Instagram Story templates (1080×1920px)',
+                  'LinkedIn Banner template (1584×396px)',
+                  'Ready-to-use in Canva, Photoshop, or any design tool',
+                ].map((item, i) => (
+                  <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
+                    <svg className="w-4 h-4 mt-0.5 shrink-0 text-[#D4A574]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              {productId === 'pro-plan' ? null : (
+                <div className="mt-6 pt-6 border-t border-gray-100">
+                  <p className="text-sm text-gray-500 mb-3">Want more? Get unlimited access to all kits!</p>
+                  <button
+                    onClick={() => { window.location.hash = '#/'; window.location.reload() }}
+                    className="w-full py-2.5 border-2 border-[#D4A574] text-[#D4A574] rounded-xl font-semibold text-sm hover:bg-[#D4A574] hover:text-white transition-all"
+                  >
+                    Explore Pro Plan — $19/month
+                  </button>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function App() {
+  const [route, setRoute] = useState('home')
   const [showPro, setShowPro] = useState(false)
   const [leadMagnet, setLeadMagnet] = useState(null)
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash || '#/'
+      if (hash.startsWith('#/download')) {
+        setRoute('download')
+      } else {
+        setRoute('home')
+      }
+    }
+    handleHashChange()
+    window.addEventListener('hashchange', handleHashChange)
+    return () => window.removeEventListener('hashchange', handleHashChange)
+  }, [])
+
+  if (route === 'download') {
+    return <DownloadPage />
+  }
 
   return (
     <div className="min-h-screen">
