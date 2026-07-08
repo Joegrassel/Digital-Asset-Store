@@ -9,7 +9,7 @@ In aesthetic medicine, your social media is your digital storefront. Before book
 
 Use this audit to identify gaps and opportunities — then fix them fast.
 
-> 🎨 Want the designs already done? Our [Clinic Essentials Kit](http://localhost:3000) includes 5 premium templates designed for aesthetic professionals.
+> 🎨 Want the designs already done? Our [Clinic Essentials Kit](https://joegrassel.github.io/Digital-Asset-Store/) includes 5 premium templates designed for aesthetic professionals.
 
 ---
 
