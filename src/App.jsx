@@ -311,7 +311,7 @@ function KitCard({ kit, onBuy }) {
                 previewImg === src ? 'border-white scale-110' : 'border-white/40 opacity-60 hover:opacity-100'
               }`}
             >
-              <img src={src} alt="" className="w-full h-full object-cover" />
+              <img src={src} alt={`${kit.title} preview ${i + 1}`} className="w-full h-full object-cover" />
             </button>
           ))}
         </div>
