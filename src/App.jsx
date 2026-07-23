@@ -313,6 +313,7 @@ function KitCard({ kit }) {
               aria-label={`Preview ${i + 1}`}
             >
               <img src={src} alt="" className="w-full h-full object-cover" loading="lazy" />
+              <img src={src} alt={`${kit.title} preview ${i + 1}`} className="w-full h-full object-cover" />
             </button>
           ))}
         </div>
